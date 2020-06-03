@@ -1,0 +1,27 @@
+@font-face {
+  font-family: NexonLv2Gothic;
+  src: url(font/lv2_gothic.eot) format('embedded-opentype'),
+       url(font/lv2_gothic.woff) format('woff');
+  font-style: 400;
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: NexonLv2Gothic;
+  src: url(font/lv2_gothic_bold.eot) format('embedded-opentype'),
+       url(font/lv2_gothic_bold.woff) format('woff');
+  font-style: 700;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: NexonLv2Gothic;
+  src: url(font/lv2_gothic_light.eot) format('embedded-opentype'),
+       url(font/lv2_gothic_light.woff) format('woff');
+  font-style: 300;
+  font-weight: 300;
+}
+
+* {
+  font-family: NexonLv2Gothic;
+}
