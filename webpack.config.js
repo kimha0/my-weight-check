@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const config = require('sapper/config/webpack.js');
 const pkg = require('./package.json');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const mode = process.env.NODE_ENV;
 const dev = mode === 'development';
@@ -22,12 +23,25 @@ module.exports = {
 					use: {
 						loader: 'svelte-loader',
 						options: {
-							dev,
+              dev,
+              emitCss: true,
 							hydratable: true,
 							hotReload: false // pending https://github.com/sveltejs/svelte/issues/2377
 						}
 					}
-				}
+        },
+        {
+          test: /\.css$/i,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                publicPath: '/static'
+              }
+            },
+            'css-loader'
+          ],
+        }
 			]
 		},
 		mode,
@@ -37,7 +51,8 @@ module.exports = {
 			new webpack.DefinePlugin({
 				'process.browser': true,
 				'process.env.NODE_ENV': JSON.stringify(mode)
-			}),
+      }),
+      new MiniCssExtractPlugin(),
 		].filter(Boolean),
 		devtool: dev && 'inline-source-map'
 	},
@@ -55,15 +70,31 @@ module.exports = {
 					use: {
 						loader: 'svelte-loader',
 						options: {
-							css: false,
+              css: false,
+              emitCss: true,
 							generate: 'ssr',
 							dev
 						}
 					}
-				}
+        },
+        {
+          test: /\.css$/i,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+              options: {
+                publicPath: '/static'
+              }
+            },
+            'css-loader'
+          ],
+        }
 			]
 		},
-		mode: process.env.NODE_ENV,
+    mode: process.env.NODE_ENV,
+    plugins: [
+      new MiniCssExtractPlugin(),
+    ],
 		performance: {
 			hints: false // it doesn't matter if server.js is large
 		}
