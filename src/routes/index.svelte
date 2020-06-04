@@ -41,7 +41,7 @@
 	<title>Sapper project template</title>
 </svelte:head>
 
-<div class='h-screen w-screen bg-gray-400 flex justify-center items-center'>
+
 {#if isViewPage}
   <main
     class='container rounded-lg m-6 bg-white min-h-card overflow-hidden'
@@ -95,4 +95,3 @@
   {/if}
   </main>
 {/if}
-</div>

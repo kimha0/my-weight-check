@@ -4,5 +4,7 @@
 </script>
 
 <main>
-	<slot></slot>
+  <div class='h-screen w-screen bg-gray-400 flex justify-center items-center'>
+	  <slot></slot>
+  </div>
 </main>
