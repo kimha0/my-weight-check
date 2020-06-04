@@ -9,7 +9,7 @@
 <script>
   import { tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
-  import { widthZero } from '../animations';
+  import { goto } from '@sapper/app';
 
   let weight;
   let isValidated = true;
@@ -18,6 +18,7 @@
   let isViewPage = true;
 
   const onSubmit = (event) => {
+    event.preventDefault();
     if (Math.sign(weight) === 1) {
       isValidated = true;
       errorMessage = null;
@@ -42,7 +43,10 @@
 
 <div class='h-screen w-screen bg-gray-400 flex justify-center items-center'>
 {#if isViewPage}
-  <main class='container rounded-lg p-6 m-6 bg-white min-h-card overflow-hidden box-border' out:widthZero={{ duration: 1000 }}>
+  <main
+    class='container rounded-lg m-6 bg-white min-h-card overflow-hidden'
+    out:fade={{ duration: 1000 }}
+    on:outroend="{async () => await goto('/detail')}">
   {#if step === 0}
     <div
       out:fly='{{ x: 300, duration: 300 }}'
@@ -50,14 +54,14 @@
       class='flex justify-center items-center flex-col min-h-inherit'
     >
       <section class='text-center text-center my-4'>
-        <h1 class='text-lg font-light text-gray-800'>오늘 한 운동을 작성해보세요</h1>
+        <h1 class='text-lg font-light text-gray-800'>🏋️‍♀️</h1>
       </section>
-      <article class='flex justify-center items-center flex-col w-full'>
+      <form on:submit={onSubmit} class='flex justify-center items-center flex-col w-full'>
         <input
           class:text-red-600={!isValidated}
           class:border-red-400={!isValidated}
           class:border-gray-200={isValidated}
-          class='border py-2 px-4 mx-2 my-6 w-full box-border transition-colors duration-300 rounded-md' type='number' placeholder='오늘의 체중을 입력해보세요' bind:value={weight} min={1} max={200} />
+          class='border py-2 px-4 mx-2 my-6 w-full box-border transition-colors duration-300 rounded-md text-center' type='number' placeholder='오늘의 체중을 입력해보세요' bind:value={weight} min={1} max={1000} />
         <p class='text-red-600 mt-0'>
         {#if !isValidated}
           <span transition:fade='{{ duration: 300 }}'>{errorMessage}</span>
@@ -66,12 +70,12 @@
         {/if}
         </p>
         <button
+          type='submit'
           class:text-red-600={!isValidated}
           class:border-red-400={!isValidated}
           class:border-gray-200={isValidated}
-          on:click={onSubmit}
           class='border py-2 px-4 mx-2 mt-6 w-auto box-border text-gray-800 transition-colors duration-300 rounded-md'>✔ 확인</button>
-      </article>
+      </form>
     </div>
   {:else if (step === 1)}
     <div
@@ -81,7 +85,7 @@
       <p class='h-full font-light'>좋아요</p>
     </div>
   {:else if (step === 2)}
-      <div
+    <div
       in:fade='{{ duration: 1000 }}'
       out:fade='{{ duration: 300 }}'
       on:introend="{() => { window.setTimeout(async() => { step = 3; await tick(); isViewPage = false }, 1500) }}"
