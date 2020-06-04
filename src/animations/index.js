@@ -23,6 +23,31 @@ function widthZero(node, {
   }
 };
 
+function heightZero(node, {
+  delay = 0,
+  duration = 400,
+}) {
+  const [h, ho] = getPropertyValueByStyle(getComputedStyle(node).height);
+  const [pt, pto] = getPropertyValueByStyle(getComputedStyle(node).paddingTop);
+  const [pb, pbo] = getPropertyValueByStyle(getComputedStyle(node).paddingBottom);
+  const [mt, mto] = getPropertyValueByStyle(getComputedStyle(node).marginTop);
+  const [mb, mbo] = getPropertyValueByStyle(getComputedStyle(node).marginBottom);
+
+  
+
+  return {
+    delay,
+    duration,
+    css: t => `max-height: ${t * h}${ho};
+      height: ${t * h}${ho};
+      padding-top: ${t * pt}${pto};
+      padding-bottom: ${t * pb}${pbo};
+      margin-top: ${t * mt}${mto};
+      margin-bottom: ${t * mb}${mbo};
+    `,
+  }
+};
+
 function getPropertyValueByStyle(style = '') {
   const regex = /px|%|em|vw/;
   const width = parseInt(style, 10);
@@ -35,4 +60,4 @@ function getPropertyValueByStyle(style = '') {
   return [width, output];
 }
 
-export { widthZero };
+export { widthZero, heightZero };
