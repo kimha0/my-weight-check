@@ -15,9 +15,11 @@
   },
   "dependencies": {
     "compression": "^1.7.1",
+    "date-fns": "^2.14.0",
     "polka": "next",
     "sirv": "^0.4.0",
-    "tui-chart": "^3.11.2"
+    "tui-chart": "^3.11.2",
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
     "css-loader": "^3.5.3",

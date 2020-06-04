@@ -6,16 +6,26 @@
   }
 </style>
 
+<script context="module">
+  import { data } from '../store';
+</script>
+
+
 <script>
   import { tick } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { goto } from '@sapper/app';
 
+  const { setName, add } = data;
+
   let weight;
+  let name;
+
   let isValidated = true;
   let errorMessage;
   let step = 0;
   let isViewPage = true;
+  let isEmptyName = !$data.name;
 
   const onSubmit = (event) => {
     event.preventDefault();
@@ -23,6 +33,10 @@
       isValidated = true;
       errorMessage = null;
       step = -1;
+
+      // TODO
+      setName(name || 'Empty');
+      add(weight);
       
     } else {
       isValidated = false;
@@ -34,8 +48,9 @@
     isValidated = true;
     errorMessage = null;
   }
-
 </script>
+
+
 
 <svelte:head>
 	<title>Sapper project template</title>
@@ -57,11 +72,19 @@
         <h1 class='text-lg font-light text-gray-800'>🏋️‍♀️</h1>
       </section>
       <form on:submit={onSubmit} class='flex justify-center items-center flex-col w-full'>
+        {#if isEmptyName}
         <input
           class:text-red-600={!isValidated}
           class:border-red-400={!isValidated}
           class:border-gray-200={isValidated}
-          class='border py-2 px-4 mx-2 my-6 w-full box-border transition-colors duration-300 rounded-md text-center' type='number' placeholder='오늘의 체중을 입력해보세요' bind:value={weight} min={1} max={1000} />
+          class='border py-2 px-4 mx-2 my-3 mb-0 w-full box-border transition-colors duration-300 rounded-md text-center' type='text' placeholder='이름을 입력해주세요.' bind:value={name} />
+        {/if}
+
+        <input
+          class:text-red-600={!isValidated}
+          class:border-red-400={!isValidated}
+          class:border-gray-200={isValidated}
+          class='border py-2 px-4 mx-2 my-3 mb-0 w-full box-border transition-colors duration-300 rounded-md text-center' type='number' placeholder='오늘의 체중을 입력해보세요' bind:value={weight} min={1} max={1000} />
         <p class='text-red-600 mt-0'>
         {#if !isValidated}
           <span transition:fade='{{ duration: 300 }}'>{errorMessage}</span>
