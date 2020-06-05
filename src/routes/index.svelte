@@ -6,12 +6,8 @@
   }
 </style>
 
-<script context="module">
-  import { data } from '../store';
-</script>
-
-
 <script>
+  import { data } from '../store'
   import { tick, onMount } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { goto } from '@sapper/app';
