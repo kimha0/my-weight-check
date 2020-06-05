@@ -1,8 +1,8 @@
 <script>
   import { onMount } from "svelte";
-  import { fly } from 'svelte/transition';
+  import { fly, fade } from 'svelte/transition';
   import { heightZero } from '../animations';
-  import { getYear, getMonth } from 'date-fns'
+  import { getYear, getMonth } from 'date-fns';
   import "tui-chart/dist/tui-chart.css";
 
   const nowDate = new Date();
@@ -89,7 +89,6 @@
     tui = Chart;
     tui.registerTheme("customTheme", theme);
     const i = new tui.areaChart(chartContainer, data, initalizeOptions);
-    i.update();
   });
 </script>
 
@@ -104,7 +103,8 @@
 
 </style>
 
-<main>
+<main
+  in:fade={{ delay: 2000, duration: 1000 }}>
   <aside class="absolute bg-white rounded-md">
     <div class='m-3'>
       <select bind:value={selectYear} class='border border-gray-400 rounded-md px-2 py-2 w-full'>

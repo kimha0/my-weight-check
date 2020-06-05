@@ -12,9 +12,10 @@
 
 
 <script>
-  import { tick } from 'svelte';
+  import { tick, onMount } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import { goto } from '@sapper/app';
+  import { isSameDay } from 'date-fns';
 
   const { setName, add } = data;
 
@@ -48,6 +49,17 @@
     isValidated = true;
     errorMessage = null;
   }
+
+  onMount(async () => {
+    const weightList = $data.weightList || [];
+    const nowDate = new Date();
+    const todayWeightData = weightList.find(weight => isSameDay(nowDate, new Date(weight.date)));
+    if (todayWeightData !== undefined) {
+      step = -1;
+      await tick();
+      await goto('/detail');
+    }
+  });
 </script>
 
 
