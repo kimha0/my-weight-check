@@ -20,8 +20,8 @@
 
   let isValidated = true;
   let errorMessage;
-  let step = 0;
-  let isViewPage = true;
+  let step = -1;
+  let isViewPage = false;
   let isEmptyName = !$data.name;
 
   const onSubmit = (event) => {
@@ -55,6 +55,8 @@
       await tick();
       await goto('/detail');
     }
+    step = 0;
+    isViewPage = true;
   });
 </script>
 
