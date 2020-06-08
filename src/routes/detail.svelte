@@ -9,7 +9,8 @@
     isSameDay,
     format,
     set,
-    differenceInYears
+    differenceInYears,
+    isSameYear,
   } from "date-fns";
   import { data } from "../store";
   import "tui-chart/dist/tui-chart.css";
@@ -65,7 +66,7 @@
     },
     series: {
       zoomable: true,
-      showDot: false,
+      showDot: true,
       areaOpacity: 0.8
     },
     tooltip: {
@@ -120,6 +121,7 @@
     switch (scoops) {
       case 1: {
         categories = days.map(day => new Date(selectYear, selectMonth, day));
+        const _categorires = [];
         weightData = categories.reduce((accu, curr) => {
           const weight = weightList.find(weight =>
             isSameDay(new Date(weight.date), curr)
@@ -128,7 +130,8 @@
             return accu;
           }
 
-          return [...accu, [new Date(weight.date), weight.value]];
+          const date = new Date(weight.date);
+          return [...accu, [date, weight.value]];
         }, []);
 
         graphData = {
