@@ -10,6 +10,8 @@
     isSameMonth,
     isSameYear,
     format,
+    set,
+    differenceInYears,
   } from "date-fns";
   import { data } from "../store";
   import "tui-chart/dist/tui-chart.css";
@@ -24,7 +26,7 @@
   /**
    * 1 = day
    * 2 = month
-   * 3 = year
+   * 3 = all
    */
 
   let selectYear = getYear(nowDate);
@@ -64,7 +66,7 @@
     },
     yAxis: {
       suffix: "kg",
-      pointOnColumn: true,
+      pointOnColumn: true
     },
     legend: { visible: false },
     chartExportMenu: { visible: false }
@@ -90,7 +92,7 @@
         fontFamily: "NexonLv2Gothic",
         fontWeight: "light",
         color: "#1A202C"
-      },
+      }
     },
     yAxis: {
       label: {
@@ -106,51 +108,69 @@
     switch (scoops) {
       case 1: {
         categories = days.map(day => new Date(selectYear, selectMonth, day));
-        weightData = categories.reduce(
-          (accu, curr) => {
-            const weight = weightList.find(weight => isSameDay(new Date(weight.date), curr));
-            if (!weight) {
-              return accu;
-            }
+        weightData = categories.reduce((accu, curr) => {
+          const weight = weightList.find(weight =>
+            isSameDay(new Date(weight.date), curr)
+          );
+          if (!weight) {
+            return accu;
+          }
 
-            return [
-              ...accu,
-              [new Date(weight.date), weight.value],
-            ]
-          },
-          [],
-        );
+          return [...accu, [new Date(weight.date), weight.value]];
+        }, []);
+
+        graphData = {
+          series: [
+            {
+              name: $data.name,
+              data: weightData
+            }
+          ]
+        };
         break;
       }
       case 2: {
         categories = months.map(month => new Date(selectYear, month - 1));
-        weightData = categories.reduce(
-          (accu, curr) => [
-            ...accu,
-            weightList.find(weight => isSameYear(new Date(weight.date, curr)))
-          ],
-          []
-        ).map(w => w ? w.value : null);
+        const today = set(new Date(), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0, });
+        const weightData = weightList.filter(weight => differenceInYears(new Date(weight.date), today) === 0)
+          .map(weight => [new Date(weight.date), weight.value])
+        graphData = {
+          series: [
+            {
+              name: $data.name,
+              data: weightData,
+            }
+          ]
+        }
+
         break;
       }
       case 3: {
-        break;
+        const weightData = weightList.map(weight => [new Date(weight.date), weight.value])
+        graphData = {
+          series: [
+            {
+              name: $data.name,
+              data: weightData,
+            }
+          ]
+        }
       }
 
       default: {
         categories = [];
         break;
       }
-    };
+    }
 
-    graphData = {
-      series: [
-        {
-          name: $data.name,
-          data: weightData,
-        }
-      ]
-    };
+    // graphData = {
+    //   series: [
+    //     {
+    //       name: $data.name,
+    //       data: weightData
+    //     }
+    //   ]
+    // };
 
     if (tuiInstance && chartContainer) {
       tuiInstance.destroy();
@@ -188,15 +208,22 @@
 
 <main in:fade={{ delay: 2000, duration: 1000 }}>
   <aside class="absolute bg-white rounded-md">
-    <div class="m-3">
-      <select
-        bind:value={selectYear}
-        class="border border-gray-400 rounded-md px-2 py-2 w-full">
-        {#each years as year (year)}
-          <option value={year} selected={year === selectYear}>{year}</option>
-        {/each}
-      </select>
-    </div>
+    {#if scoops !== 3}
+      <div
+        class="m-3"
+        out:heightZero={{ delay: 150, duration: 300 }}
+        in:heightZero={{ delay: 0, duration: 300 }}>
+        <select
+          out:fly={{ x: -200, duration: 300 }}
+          in:fly={{ x: -200, duration: 300, delay: 150 }}
+          bind:value={selectYear}
+          class="border border-gray-400 rounded-md px-2 py-2 w-full">
+          {#each years as year (year)}
+            <option value={year} selected={year === selectYear}>{year}</option>
+          {/each}
+        </select>
+      </div>
+    {/if}
     {#if scoops === 1}
       <div
         class="m-3"
@@ -216,7 +243,7 @@
       </div>
     {/if}
 
-    <div class="p-6 pt-0 pb-3 flex flex-col">
+    <div class="p-6 pt-3 pb-3 flex flex-col">
       <label class="py-1 flex items-center justify-between">
         <input type="radio" bind:group={scoops} value={1} />
         <span class="pl-2">Days</span>
@@ -227,7 +254,7 @@
       </label>
       <label class="py-1 flex items-center justify-between">
         <input type="radio" bind:group={scoops} value={3} />
-        <span class="pl-2">Years</span>
+        <span class="pl-2">All</span>
       </label>
     </div>
   </aside>
