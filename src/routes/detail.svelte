@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { fly, fade } from "svelte/transition";
   import { heightZero } from "../animations";
   import {
@@ -7,16 +7,20 @@
     getMonth,
     getDaysInMonth,
     isSameDay,
-    isSameMonth,
-    isSameYear,
     format,
     set,
-    differenceInYears,
+    differenceInYears
   } from "date-fns";
   import { data } from "../store";
   import "tui-chart/dist/tui-chart.css";
 
   const nowDate = new Date();
+
+  let windowInnerWidth = 1160;
+  let windowInnerHeight = 540;
+
+  $: chartWidth = windowInnerWidth > 1160 ? 1160 : windowInnerWidth;
+  $: chartHeight = windowInnerHeight > 540 ? 540 : windowInnerHeight;
 
   let tui;
   let chartContainer;
@@ -53,8 +57,9 @@
       width: 1160,
       height: 540,
       format: (value, chartType, type, axis) => {
-        if (axis === 'y') return `${value}kg`;
-        if (axis === 'x') return format(new Date(parseInt(value, 10)), 'yyyy년 M월 d일');
+        if (axis === "y") return `${value}kg`;
+        if (axis === "x")
+          return format(new Date(parseInt(value, 10)), "yyyy년 M월 d일");
         return value;
       }
     },
@@ -68,7 +73,8 @@
     },
     xAxis: {
       type: "datetime",
-      dateFormat: scoops === 1 ? "YYYY.MM.DD" : scoops === 2 ? "YYYY.MM" : "YYYY"
+      dateFormat:
+        scoops === 1 ? "YYYY.MM.DD" : scoops === 2 ? "YYYY.MM" : "YYYY"
     },
     yAxis: {
       suffix: "",
@@ -129,7 +135,7 @@
           series: [
             {
               name: $data.name,
-              data: weightData,
+              data: weightData
             }
           ]
         };
@@ -143,17 +149,25 @@
       }
       case 2: {
         categories = months.map(month => new Date(selectYear, month - 1));
-        const today = set(new Date(), { hours: 0, minutes: 0, seconds: 0, milliseconds: 0, });
-        const weightData = weightList.filter(weight => differenceInYears(new Date(weight.date), today) === 0)
-          .map(weight => [new Date(weight.date), weight.value])
+        const today = set(new Date(), {
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0
+        });
+        const weightData = weightList
+          .filter(
+            weight => differenceInYears(new Date(weight.date), today) === 0
+          )
+          .map(weight => [new Date(weight.date), weight.value]);
         graphData = {
           series: [
             {
               name: $data.name,
-              data: weightData,
+              data: weightData
             }
           ]
-        }
+        };
         if (weightData.length === 0) {
           destroyChart();
           break;
@@ -162,15 +176,18 @@
         break;
       }
       case 3: {
-        const weightData = weightList.map(weight => [new Date(weight.date), weight.value])
+        const weightData = weightList.map(weight => [
+          new Date(weight.date),
+          weight.value
+        ]);
         graphData = {
           series: [
             {
               name: $data.name,
-              data: weightData,
+              data: weightData
             }
           ]
-        }
+        };
         if (weightData.length === 0) {
           destroyChart();
           break;
@@ -186,8 +203,18 @@
     }
   }
 
+  $: {
+    if (tuiInstance) {
+      tuiInstance.resize({ width: chartWidth, height: chartHeight });
+    }
+  }
+
   onMount(() => {
     initializeChart();
+  });
+
+  onDestroy(() => {
+    destroyChart();
   });
 
   async function initializeChart() {
@@ -198,7 +225,7 @@
     tuiInstance = new tui.lineChart(
       chartContainer,
       graphData,
-      initalizeOptions
+      initalizeOptions,
     );
     hasWeightData = true;
   }
@@ -220,12 +247,11 @@
       tuiInstance = new tui.lineChart(
         chartContainer,
         graphData,
-        initalizeOptions
+        initalizeOptions,
       );
       hasWeightData = true;
     }
   }
-
 </script>
 
 <style>
@@ -237,6 +263,8 @@
     min-height: 100px;
   }
 </style>
+
+<svelte:window bind:innerWidth={windowInnerWidth} bind:innerHeight={windowInnerHeight} />
 
 <main in:fade={{ delay: 2000, duration: 1000 }}>
   <aside class="absolute bg-white rounded-md">
@@ -292,7 +320,7 @@
   </aside>
   <section class="rounded-md p-6 pt-8 bg-white" bind:this={chartContainer}>
     {#if !hasWeightData}
-    <p>No data</p>
+      <p>No data</p>
     {/if}
   </section>
 </main>
