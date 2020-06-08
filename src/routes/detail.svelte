@@ -45,12 +45,18 @@
   let categories;
   let weightData;
   let graphData;
+  let hasWeightData = false;
 
   $: initalizeOptions = {
     theme: "customTheme",
     chart: {
       width: 1160,
-      height: 540
+      height: 540,
+      format: (value, chartType, type, axis) => {
+        if (axis === 'y') return `${value}kg`;
+        if (axis === 'x') return format(new Date(parseInt(value, 10)), 'yyyy년 M월 d일');
+        return value;
+      }
     },
     series: {
       zoomable: true,
@@ -62,10 +68,10 @@
     },
     xAxis: {
       type: "datetime",
-      dateFormat: scoops === 1 ? "MM.DD" : scoops === 2 ? "YYYY.MM" : "YYYY"
+      dateFormat: scoops === 1 ? "YYYY.MM.DD" : scoops === 2 ? "YYYY.MM" : "YYYY"
     },
     yAxis: {
-      suffix: "kg",
+      suffix: "",
       pointOnColumn: true
     },
     legend: { visible: false },
@@ -123,10 +129,16 @@
           series: [
             {
               name: $data.name,
-              data: weightData
+              data: weightData,
             }
           ]
         };
+
+        if (weightData.length === 0) {
+          destroyChart();
+          break;
+        }
+        reInitalizeChart();
         break;
       }
       case 2: {
@@ -142,7 +154,11 @@
             }
           ]
         }
-
+        if (weightData.length === 0) {
+          destroyChart();
+          break;
+        }
+        reInitalizeChart();
         break;
       }
       case 3: {
@@ -155,6 +171,12 @@
             }
           ]
         }
+        if (weightData.length === 0) {
+          destroyChart();
+          break;
+        }
+        reInitalizeChart();
+        break;
       }
 
       default: {
@@ -162,28 +184,13 @@
         break;
       }
     }
-
-    // graphData = {
-    //   series: [
-    //     {
-    //       name: $data.name,
-    //       data: weightData
-    //     }
-    //   ]
-    // };
-
-    if (tuiInstance && chartContainer) {
-      tuiInstance.destroy();
-      tui.registerTheme("customTheme", theme);
-      tuiInstance = new tui.lineChart(
-        chartContainer,
-        graphData,
-        initalizeOptions
-      );
-    }
   }
 
-  onMount(async () => {
+  onMount(() => {
+    initializeChart();
+  });
+
+  async function initializeChart() {
     const { default: Chart } = await import("tui-chart");
     tui = Chart;
     tui.registerTheme("customTheme", theme);
@@ -193,7 +200,32 @@
       graphData,
       initalizeOptions
     );
-  });
+    hasWeightData = true;
+  }
+
+  function destroyChart() {
+    if (tuiInstance && chartContainer) {
+      tuiInstance.destroy();
+      tuiInstance = null;
+      hasWeightData = false;
+    }
+  }
+
+  async function reInitalizeChart() {
+    if (tuiInstance) {
+      tuiInstance.destroy();
+    }
+    if (chartContainer) {
+      tui.registerTheme("customTheme", theme);
+      tuiInstance = new tui.lineChart(
+        chartContainer,
+        graphData,
+        initalizeOptions
+      );
+      hasWeightData = true;
+    }
+  }
+
 </script>
 
 <style>
@@ -258,5 +290,9 @@
       </label>
     </div>
   </aside>
-  <section class="rounded-md p-6 pt-8 bg-white" bind:this={chartContainer} />
+  <section class="rounded-md p-6 pt-8 bg-white" bind:this={chartContainer}>
+    {#if !hasWeightData}
+    <p>No data</p>
+    {/if}
+  </section>
 </main>
